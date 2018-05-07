@@ -63,6 +63,7 @@ module Gold {
 			this.player.height = 200;
 			this.player.x = (this.stageW - this.player.width) / 2;
 			this.player.y = this.stageH - this.player.height;
+			this.player.touchEnabled = false;
 			this.addChild(this.player);
 
 			//开始按钮
@@ -108,11 +109,13 @@ module Gold {
 			this.score.text = '得分：' + this.myScore;
 			this.timesDisplay.text = '倒计时：' + this.gameAllTime;
 			this.hp.text = "生命值：" + this.myHp;
+			this.player.x = (this.stageW - this.player.width) / 2;
 			this.btnStart.visible = false;//隐藏开始按钮
 			if (this.gameOverDisplay.parent == this)//移除显示的上次成绩
 				this.removeChild(this.gameOverDisplay);
 
 			this.addEventListener(egret.Event.ENTER_FRAME, this.gameViewUpdate, this);
+			this.bg.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onPlayerBegin, this);
 			this.bg.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onPlayerMove, this);
 			//创建金币
 			this.goldTimer.addEventListener(egret.TimerEvent.TIMER, this.createGold, this);
@@ -136,6 +139,7 @@ module Gold {
 			this.btnStart.visible = true;
 			//移除一系列监听
 			this.removeEventListener(egret.Event.ENTER_FRAME, this.gameViewUpdate, this);
+			this.bg.removeEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onPlayerBegin, this);
 			this.bg.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.onPlayerMove, this);
 
 			this.goldTimer.removeEventListener(egret.TimerEvent.TIMER, this.createGold, this);
@@ -279,12 +283,25 @@ module Gold {
 				this.bombs.push(bomb);
 			}
 		}
+
+		private lastX: number;
+		private onPlayerBegin(e: egret.TouchEvent): void {
+			this.lastX = e.stageX;
+		}
 		/**角色移动 */
 		private onPlayerMove(e: egret.TouchEvent): void {
-			let curX: number = e.stageX;
-			curX = Math.max(0, curX);
-			curX = Math.min(curX, this.stageW - this.player.width);
-			this.player.x = curX;
+			// let curX: number = e.stageX;
+			// curX = Math.max(0, curX);
+			// curX = Math.min(curX, this.stageW - this.player.width);
+			// this.player.x = curX;
+			var moveX: number = e.stageX - this.lastX;
+			this.player.x += moveX;
+			this.lastX = e.stageX;
+			if (this.player.x < 0) {
+				this.player.x = 0;
+			} else if (this.player.x > this.stageW - this.player.width) {
+				this.player.x = this.stageW - this.player.width
+			}
 		}
 	}
 }
